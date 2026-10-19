@@ -145,7 +145,9 @@ function Lyrics({ lyrics, matched, connected, track, position, wordMode }) {
 	if (!matched || status === "loading") return big("SEARCHING…", "local .lrc → cache → lrclib.net");
 	if (status === "instrumental") return big("♪ INSTRUMENTAL ♪", track.artist.toUpperCase());
 	if (status === "ad") return big("ADVERTISEMENT");
-	if (status === "error") return big("LYRICS UNREACHABLE", "network error — retried on the next track");
+	if (status === "error")
+		return big("LYRICS UNREACHABLE", `${(lyrics.error || "network error").slice(0, 90)}  ·  ` +
+			(lyrics.retry_in ? `retrying in ${lyrics.retry_in}s` : "gave up for this track — run: crimsonctl reload-lyrics"));
 	if (status === "plain") return big((track.title || "").toUpperCase(), "UNSYNCED LYRICS ONLY — open crimson-lyrics to read them (no fake timing)");
 	if (status !== "synced" || !lyrics.lines?.length) return big((track.title || "").toUpperCase(), "NO SYNCED LYRICS FOUND  ·  add an .lrc to ~/.config/crimson-desktop/lyrics/");
 

@@ -179,16 +179,25 @@ class Core:
         else:
             self._broadcast("art", self.art_msg())
 
+    RETRY_DELAYS = (15, 60, 180)  # seconds; network errors are retried while the same track plays
+
     async def _load_lyrics(self, track, force: bool = False) -> None:
         self.lyrics = {"status": "loading", "lines": [], "track_id": track.id}
         self._broadcast("lyrics", self.lyrics_msg())
-        res = await asyncio.get_running_loop().run_in_executor(
-            None, self.lyrics_svc.lookup, track.artist, track.title, track.album, track.length_ms, force)
-        if track.id != self.mpris.state.track.id:
-            return  # track changed while we were fetching
-        self.lyrics = {**res, "track_id": track.id}
-        log.info("lyrics for %s - %s: %s (%s)", track.artist, track.title, res["status"], res.get("source"))
-        self._broadcast("lyrics", self.lyrics_msg())
+        for attempt in range(len(self.RETRY_DELAYS) + 1):
+            res = await asyncio.get_running_loop().run_in_executor(
+                None, self.lyrics_svc.lookup, track.artist, track.title, track.album, track.length_ms, force)
+            if track.id != self.mpris.state.track.id:
+                return  # track changed while we were fetching (this task is cancelled on track change too)
+            retry_in = self.RETRY_DELAYS[attempt] if res["status"] == "error" and attempt < len(self.RETRY_DELAYS) else 0
+            self.lyrics = {**res, "track_id": track.id, "retry_in": retry_in,
+                           "error": res.get("source", "").removeprefix("network: ") if res["status"] == "error" else ""}
+            log.info("lyrics for %s - %s: %s (%s)%s", track.artist, track.title, res["status"], res.get("source"),
+                     f" - retrying in {retry_in}s" if retry_in else "")
+            self._broadcast("lyrics", self.lyrics_msg())
+            if not retry_in:
+                return
+            await asyncio.sleep(retry_in)
 
     async def _load_art(self, track_id: str, url: str) -> None:
         def fetch() -> str:

@@ -71,7 +71,8 @@ Item {
         case "loading": return "LOCAL .LRC  →  CACHE  →  LRCLIB.NET"
         case "plain": return "UNSYNCED LYRICS ONLY  //  READ THEM IN crimson-lyrics"
         case "none": return "NO SYNCED LYRICS FOUND  //  " + (track.artist || "").toUpperCase()
-        case "error": return "LYRICS SERVICE UNREACHABLE  //  WILL RETRY ON NEXT TRACK"
+        case "error": return "LYRICS SERVICE UNREACHABLE  //  " + (root.lyrics.error || "").toUpperCase().slice(0, 70)
+                             + (root.lyrics.retry_in ? "  //  RETRY IN " + root.lyrics.retry_in + "S" : "  //  CRIMSONCTL RELOAD-LYRICS")
         case "instrumental": return (track.artist || "").toUpperCase()
         default: return ""
         }

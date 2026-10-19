@@ -221,7 +221,9 @@ class LyricsTUI:
         if st == "instrumental":
             return self.message(W, H, "♪ INSTRUMENTAL ♪", "")
         if st == "error":
-            return self.message(W, H, "✕ LYRICS SERVICE UNREACHABLE", "press r to retry")
+            ly = self.lyrics
+            sub = (ly.get("error") or "network error")[:60] + ("  ·  retrying in %ss" % ly["retry_in"] if ly.get("retry_in") else "  ·  press r to retry")
+            return self.message(W, H, "✕ LYRICS SERVICE UNREACHABLE", sub)
         if st == "plain":
             return self.plain(W, H)
         if st != "synced" or not self.lyrics.get("lines"):
