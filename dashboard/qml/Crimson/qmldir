@@ -1,0 +1,19 @@
+module Crimson
+singleton Theme 1.0 Theme.qml
+Panel 1.0 Panel.qml
+PixelText 1.0 PixelText.qml
+NowPlaying 1.0 NowPlaying.qml
+LyricsPanel 1.0 LyricsPanel.qml
+SpectrumBars 1.0 SpectrumBars.qml
+CircleViz 1.0 CircleViz.qml
+DataRain 1.0 DataRain.qml
+Circuit 1.0 Circuit.qml
+PixelBlob 1.0 PixelBlob.qml
+SysTerm 1.0 SysTerm.qml
+ClockPanel 1.0 ClockPanel.qml
+Toast 1.0 Toast.qml
+Dashboard 1.0 Dashboard.qml
+MiniCard 1.0 MiniCard.qml
+Backdrop 1.0 Backdrop.qml
+HostBindings 1.0 HostBindings.qml
+Host 1.0 Host.qml

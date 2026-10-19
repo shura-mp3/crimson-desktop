@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+echo "qdbus6 $*" >> "$HOME/stub-calls.log"
+[ "qdbus6" = systemctl ] && [ "$2" = cat ] && exit 1
+exit 0

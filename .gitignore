@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+backups/*
+!backups/.gitkeep
+wallpapers/generated/
+dist/

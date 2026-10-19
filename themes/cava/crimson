@@ -1,0 +1,29 @@
+# Crimson Desktop - terminal CAVA (crimson-cava). Uses PipeWire: visualises everything you hear.
+[general]
+framerate = 60
+autosens = 1
+bars = 0
+bar_width = 2
+bar_spacing = 1
+sleep_timer = 5
+
+[input]
+method = pipewire
+source = auto
+
+[output]
+method = noncurses
+orientation = bottom
+channels = stereo
+
+[color]
+gradient = 1
+gradient_count = 4
+gradient_color_1 = '#5C1A30'
+gradient_color_2 = '#8D2445'
+gradient_color_3 = '#D58B9F'
+gradient_color_4 = '#F2B7C5'
+
+[smoothing]
+noise_reduction = 70
+monstercat = 1

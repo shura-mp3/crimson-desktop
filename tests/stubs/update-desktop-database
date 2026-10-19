@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+echo "update-desktop-database $*" >> "$HOME/stub-calls.log"
+[ "update-desktop-database" = systemctl ] && [ "$2" = cat ] && exit 1
+exit 0

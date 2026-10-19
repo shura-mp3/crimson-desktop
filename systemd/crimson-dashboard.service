@@ -1,0 +1,19 @@
+[Unit]
+Description=Crimson Desktop music dashboard (right monitor)
+Documentation=file://@PROJECT@/README.md
+PartOf=graphical-session.target
+Wants=crimson-core.service
+After=graphical-session.target plasma-workspace.target crimson-core.service
+
+[Service]
+Type=simple
+ExecStart=@PROJECT@/bin/crimson-dashboard
+# exit code 75 = monitor layout changed; Restart=always brings it back on the right screen
+Restart=always
+TimeoutStopSec=8
+RestartSec=3
+Nice=5
+CPUWeight=40
+
+[Install]
+WantedBy=graphical-session.target

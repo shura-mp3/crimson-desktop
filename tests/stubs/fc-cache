@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+echo "fc-cache $*" >> "$HOME/stub-calls.log"
+[ "fc-cache" = systemctl ] && [ "$2" = cat ] && exit 1
+exit 0

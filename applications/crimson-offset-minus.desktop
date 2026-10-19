@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Crimson: Lyrics Later (-100 ms)
+Exec=@PROJECT@/bin/crimsonctl offset -100
+Icon=media-seek-backward
+NoDisplay=true

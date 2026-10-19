@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+echo "notify-send $*" >> "$HOME/stub-calls.log"
+[ "notify-send" = systemctl ] && [ "$2" = cat ] && exit 1
+exit 0

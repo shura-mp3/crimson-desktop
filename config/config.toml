@@ -1,0 +1,57 @@
+# Crimson Desktop configuration  (~/.config/crimson-desktop/config.toml)
+# Every key is optional; anything missing falls back to the built-in default shown here.
+# After editing: `crimsonctl restart`
+
+[spotify]
+# MPRIS player names in priority order. Add "*" to fall back to any MPRIS player.
+players = ["spotify"]
+# Seconds between position re-reads while playing (catches seeks & drift). Lower = more D-Bus traffic.
+resync_interval = 1.5
+
+[lyrics]
+# Global latency compensation in milliseconds. Positive = lyrics appear EARLIER.
+# Per-track fine-tuning: scroll on the lyrics panel, +/- in crimson-lyrics, or `crimsonctl offset +100`.
+latency_ms = 0
+# Your own .lrc files are always checked first ("Artist - Title.lrc"; also ~/.config/crimson-desktop/lyrics/).
+local_dirs = ["~/Music/Lyrics", "~/Music/lyrics", "~/.lyrics"]
+# LRCLIB (https://lrclib.net): free, open lyrics database, no account or API key.
+lrclib = true
+lrclib_url = "https://lrclib.net"
+# Max difference (seconds) between Spotify's track length and a lyrics record's length.
+duration_tolerance = 3
+# How long a "no lyrics found" result is remembered before asking again.
+negative_cache_hours = 24
+# "auto": one huge word at a time when the LRC has word timestamps (reference look), else lines.
+# "line": always line mode.   Click the lyrics panel to toggle word/line while it's running.
+display_mode = "auto"
+
+[audio]
+enabled = true
+# "system"  = everything you hear (PipeWire default-output monitor) - reliable default.
+# "spotify" = EXPERIMENTAL: only Spotify's PipeWire stream (falls back to system if not found).
+source = "system"
+bars = 48
+cava_binary = "cava"
+
+[dashboard]
+# "auto" = right-most monitor (by position), or a connector name such as "DP-2" / "HDMI-A-1".
+monitor = "auto"
+# "auto" = layer-shell when available (below windows, never focused), else a KWin-ruled window.
+mode = "auto"
+# "full" or "minimal" (profiles switch this for you).
+layout = "full"
+# low | balanced | high
+performance = "balanced"
+# When Feral GameMode reports a running game: "low" (reduce effects), "hide", or "ignore".
+gamemode_action = "low"
+# Drop to the low profile while the 1-minute load average exceeds (CPU cores x this).
+load_threshold = 0.9
+
+[ui]
+pixelate_lyrics = true
+clock_24h = true
+# Shown in the system panel prompt; empty = your login name.
+username = ""
+show_matrix = true
+show_circuit = true
+show_blob = true

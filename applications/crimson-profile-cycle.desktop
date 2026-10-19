@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Crimson: Next Desktop Profile
+Comment=Cycle Crimson Music / Minimal Dark / Performance
+Exec=@PROJECT@/bin/crimsonctl profile next --notify
+Icon=preferences-desktop-theme
+NoDisplay=true

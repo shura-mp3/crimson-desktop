@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+echo "plasma-apply-cursortheme $*" >> "$HOME/stub-calls.log"
+[ "plasma-apply-cursortheme" = systemctl ] && [ "$2" = cat ] && exit 1
+exit 0

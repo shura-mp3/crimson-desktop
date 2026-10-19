@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Crimson Lyrics
+Comment=Synchronized Spotify lyrics in Kitty
+Exec=kitty --title crimson-lyrics --class crimson-lyrics @PROJECT@/bin/crimson-lyrics
+Icon=view-media-lyrics
+Terminal=false
+Categories=AudioVideo;Audio;

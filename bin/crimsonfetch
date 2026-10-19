@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Themed fastfetch.
+exec fastfetch -c "${XDG_CONFIG_HOME:-$HOME/.config}/fastfetch/crimson.jsonc" "$@"

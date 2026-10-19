@@ -1,0 +1,18 @@
+[Unit]
+Description=Crimson Desktop backend (Spotify MPRIS, synced lyrics, audio spectrum)
+Documentation=file://@PROJECT@/README.md
+PartOf=graphical-session.target
+After=graphical-session.target pipewire.service
+
+[Service]
+Type=simple
+ExecStart=@PROJECT@/bin/crimson-core
+Restart=on-failure
+TimeoutStopSec=8
+RestartSec=2
+# stay out of the way of games
+Nice=5
+CPUWeight=40
+
+[Install]
+WantedBy=graphical-session.target

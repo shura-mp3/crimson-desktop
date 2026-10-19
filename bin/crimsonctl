@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# crimsonctl - control the Crimson Desktop (see `crimsonctl help`).
+HERE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/crimson-desktop/env" ] && . "${XDG_CONFIG_HOME:-$HOME/.config}/crimson-desktop/env"
+export PYTHONPATH="$HERE${PYTHONPATH:+:$PYTHONPATH}"
+exec "${CRIMSON_PYTHON:-python3}" -m crimson.ctl "$@"

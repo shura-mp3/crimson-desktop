@@ -1,0 +1,32 @@
+// Crimson Desktop fastfetch preset — `crimsonfetch` (fastfetch -c this file)
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "data",
+    "source": "$1     /\\\n$1    /  \\\n$1   / /\\ \\\n$1  < <  > >\n$1   \\ \\/ /\n$1    \\  /\n$1     \\/",
+    "color": { "1": "red" },
+    "padding": { "top": 1, "left": 2, "right": 4 }
+  },
+  "display": {
+    "separator": "  ",
+    "color": { "keys": "magenta", "title": "bright_magenta" },
+    "key": { "width": 9 }
+  },
+  "modules": [
+    "title",
+    { "type": "custom", "format": "\u001b[31m────────────────────────────" },
+    { "type": "os", "key": "os" },
+    { "type": "kernel", "key": "kernel" },
+    { "type": "de", "key": "de" },
+    { "type": "wm", "key": "wm" },
+    { "type": "uptime", "key": "uptime" },
+    { "type": "packages", "key": "pkgs" },
+    { "type": "cpu", "key": "cpu", "temp": true },
+    { "type": "gpu", "key": "gpu", "temp": true },
+    { "type": "memory", "key": "memory" },
+    { "type": "display", "key": "display" },
+    { "type": "media", "key": "playing" },
+    "break",
+    { "type": "colors", "symbol": "block" }
+  ]
+}

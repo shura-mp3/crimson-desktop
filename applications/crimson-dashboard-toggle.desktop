@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Crimson: Toggle Music Dashboard
+Comment=Show or hide the Crimson music dashboard
+Exec=@PROJECT@/bin/crimsonctl toggle
+Icon=view-media-visualization
+NoDisplay=true
+X-KDE-GlobalAccel-CommandShortcut=true
