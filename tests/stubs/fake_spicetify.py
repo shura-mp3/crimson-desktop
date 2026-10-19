@@ -2,7 +2,8 @@
 """Test double for the spicetify CLI, modelled on spicetify/cli source (config.go arrayType,
 backup.go, status/spotify). Implements: -v, config [k v ...], backup, apply, restore.
 State: $XDG_CONFIG_HOME/spicetify/config-xpui.ini, $XDG_STATE_HOME/spicetify/Backup.
-'apply' writes Apps/xpui/{user.css,extensions/,custom-apps/} like the real tool."""
+'apply' writes Apps/xpui/{user.css, colors.css, extensions/, spicetify-routes-<app>.js/.json}
+like the real tool (src/cmd/apply.go RefreshApps, src/apply/apply.go UserCSS)."""
 
 import configparser
 import os
@@ -117,7 +118,6 @@ def main(argv):
             if x.exists():
                 shutil.rmtree(x)
             (x / "extensions").mkdir(parents=True)
-            (x / "custom-apps").mkdir()
             (x / "index.html").write_text("<html>xpui</html>")
             theme = cp["Setting"]["current_theme"]
             if theme:
@@ -125,6 +125,7 @@ def main(argv):
                 if not tdir.is_dir():
                     sys.exit(f"error: theme {theme} not found")
                 shutil.copy(tdir / "user.css", x / "user.css")
+                (x / "colors.css").write_text(":root {}")
                 if cp["Setting"]["inject_theme_js"] == "1" and (tdir / "theme.js").exists():
                     shutil.copy(tdir / "theme.js", x / "extensions" / "theme.js")
             for e in filter(None, cp["AdditionalOptions"]["extensions"].split("|")):
@@ -133,7 +134,8 @@ def main(argv):
                 src = CFG / "CustomApps" / app
                 if not src.is_dir():
                     sys.exit(f"error: custom app {app} not found")
-                shutil.copytree(src, x / "custom-apps" / app)
+                (x / f"spicetify-routes-{app}.js").write_text((src / "index.js").read_text())
+                (x / f"spicetify-routes-{app}.json").write_text((src / "manifest.json").read_text())
             print("apply done")
         elif c == "restore":
             if not any(BACKUP.glob("*.spa")):

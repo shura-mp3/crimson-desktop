@@ -677,7 +677,8 @@ def expected_problems(wait_bridge: int = 0) -> list[str]:
         if apps_state(Path(spot_path)) != "applied":
             probs.append(f"Spotify is not patched (state {apps_state(Path(spot_path))}) — Spotify may have updated; re-run install")
         else:
-            for rel in ("user.css", f"custom-apps/{APP}/index.js"):
+            # real Spicetify layout (src/cmd/apply.go RefreshApps / apply.UserCSS)
+            for rel in ("user.css", "extensions/theme.js", f"spicetify-routes-{APP}.js"):
                 if not (xpui / rel).exists():
                     probs.append(f"{xpui / rel} missing — theme not applied")
             css = xpui / "user.css"
