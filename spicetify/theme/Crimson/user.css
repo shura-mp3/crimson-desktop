@@ -1,0 +1,215 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Crimson Spotify — Spicetify theme for Crimson Desktop
+   Most colouring comes from color.ini (--spice-* variables, which Spotify's own UI uses).
+   This file only adds structure: hairline borders, active states, typography accents,
+   scrollbars, playback bar and Full App Display styling. Selectors are limited to class
+   names that Spicetify maps and maintained community themes rely on.
+
+   Profile classes on <html> (set live by theme.js from crimson-core, no restart needed):
+     .crimson-profile-crimson | .crimson-profile-minimal | .crimson-profile-performance
+     .crimson-reduce-effects   (minimal / performance / GameMode / low perf level)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --crimson-border: rgba(var(--spice-rgb-border-inactive), 0.9);
+  --crimson-border-hot: rgba(var(--spice-rgb-border-active), 0.75);
+  --crimson-glow: 0 0 0 1px rgba(var(--spice-rgb-border-active), 0.35), 0 0 18px rgba(141, 36, 69, 0.35);
+  --crimson-radius: 3px;
+  --crimson-pixel: "Jersey 10", "Pixelify Sans", "VT323", monospace;
+  --crimson-label: "Silkscreen", "Space Mono", monospace;
+  --crimson-mono: "Space Mono", "JetBrains Mono", monospace;
+  --crimson-ease: 140ms ease-out;
+}
+
+/* ── shell: hairline-framed panels instead of soft rounded blobs ───────────── */
+.Root__nav-bar,
+.Root__main-view,
+.Root__right-sidebar {
+  border: 1px solid var(--crimson-border);
+  border-radius: var(--crimson-radius) !important;
+}
+.Root__main-view {
+  /* static scanlines: zero runtime cost, removed in reduced-effects mode */
+  background-image: repeating-linear-gradient(
+    to bottom, transparent 0, transparent 3px, rgba(0, 0, 0, 0.16) 3px, rgba(0, 0, 0, 0.16) 4px);
+}
+.crimson-reduce-effects .Root__main-view { background-image: none; }
+
+.Root__globalNav { border-bottom: 1px solid var(--crimson-border); }
+
+/* ── typography: pixel type only for big decorative titles ─────────────────── */
+.main-entityHeader-title h1,
+.main-entityHeader-title span,
+.main-entityHeader-headerText h1 {
+  font-family: var(--crimson-pixel) !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.02em;
+  color: var(--spice-accent-active) !important;
+  text-shadow: 0 0 22px rgba(141, 36, 69, 0.55);
+}
+.crimson-reduce-effects .main-entityHeader-title h1,
+.crimson-reduce-effects .main-entityHeader-title span { text-shadow: none; }
+
+.main-trackList-trackListHeader {
+  font-family: var(--crimson-label);
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--crimson-border) !important;
+}
+
+/* ── library / navigation ──────────────────────────────────────────────────── */
+.main-yourLibraryX-navLinkActive,
+.main-navBar-navBarLinkActive {
+  color: var(--spice-accent-active) !important;
+  box-shadow: inset 2px 0 0 var(--spice-accent);
+}
+
+/* ── track rows: visible hover, unmistakable active/selected ───────────────── */
+.main-trackList-trackListRow {
+  border: 1px solid transparent;
+  border-radius: var(--crimson-radius);
+  transition: background-color var(--crimson-ease), border-color var(--crimson-ease);
+}
+.main-trackList-trackListRow:hover {
+  background-color: rgba(var(--spice-rgb-highlight), 0.9) !important;
+  border-color: var(--crimson-border);
+}
+.main-trackList-selected,
+.main-trackList-selected:hover {
+  background-color: rgba(141, 36, 69, 0.35) !important;
+  border-color: var(--crimson-border-hot);
+}
+.main-trackList-active .main-trackList-rowTitle,
+.main-trackList-active .main-trackList-rowSubTitle { color: var(--spice-accent-active) !important; }
+.main-trackList-active { box-shadow: inset 2px 0 0 var(--spice-playback-bar); }
+
+/* ── cards & art: framed, restrained ───────────────────────────────────────── */
+.main-card-card {
+  background-color: var(--spice-card) !important;
+  border: 1px solid var(--crimson-border);
+  border-radius: var(--crimson-radius) !important;
+  transition: border-color var(--crimson-ease), background-color var(--crimson-ease);
+}
+.main-card-card:hover { border-color: var(--crimson-border-hot); background-color: var(--spice-highlight) !important; }
+.main-card-card img,
+.x-entityImage-imageContainer,
+.main-entityHeader-container img { border-radius: 2px !important; }
+.main-entityHeader-container img { box-shadow: var(--crimson-glow) !important; }
+.crimson-reduce-effects .main-entityHeader-container img { box-shadow: 0 0 0 1px var(--crimson-border) !important; }
+
+/* ── buttons ───────────────────────────────────────────────────────────────── */
+.main-playButton-PlayButton > span,
+.main-playButton-PlayButton button span {
+  background-color: var(--spice-play-button) !important;
+  color: var(--spice-main) !important;
+}
+.main-playButton-PlayButton:hover > span { background-color: var(--spice-accent-active) !important; }
+button:focus-visible,
+a:focus-visible,
+[role="row"]:focus-visible {
+  outline: 2px solid var(--spice-accent) !important;
+  outline-offset: 2px;
+}
+
+/* ── search ────────────────────────────────────────────────────────────────── */
+.x-searchInput-searchInputInput,
+.main-topBar-searchBar {
+  background-color: var(--spice-main-elevated) !important;
+  border: 1px solid var(--crimson-border) !important;
+  color: var(--spice-text) !important;
+}
+.x-searchInput-searchInputInput:focus { border-color: var(--crimson-border-hot) !important; }
+
+/* ── context menus, dialogs, tooltips ──────────────────────────────────────── */
+.main-contextMenu-menu,
+.GenericModal,
+.main-trackCreditsModal-container,
+.main-embedWidgetGenerator-container {
+  background-color: var(--spice-main-elevated) !important;
+  border: 1px solid var(--crimson-border-hot) !important;
+  border-radius: var(--crimson-radius) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6) !important;
+}
+.main-contextMenu-menuItemButton:hover:not(.main-contextMenu-disabled) {
+  background-color: rgba(141, 36, 69, 0.45) !important;
+}
+.main-contextMenu-menuItemButton:hover:not(.main-contextMenu-disabled) span { color: var(--spice-text) !important; }
+
+/* ── now-playing bar ───────────────────────────────────────────────────────── */
+.main-nowPlayingBar-container {
+  background-color: var(--spice-player) !important;
+  border-top: 1px solid var(--crimson-border) !important;
+}
+.main-nowPlayingBar-left img { border: 1px solid var(--crimson-border); border-radius: 2px !important; }
+.playback-bar__progress-time-elapsed,
+.main-playbackBarRemainingTime-container {
+  font-family: var(--crimson-mono) !important;
+  font-size: 0.7rem !important;
+  color: var(--spice-subtext) !important;
+}
+[data-testid="control-button-playpause"] {
+  background-color: var(--spice-play-button) !important;
+  color: var(--spice-main) !important;
+  transition: background-color var(--crimson-ease), transform var(--crimson-ease);
+}
+[data-testid="control-button-playpause"]:hover { background-color: var(--spice-accent-active) !important; transform: scale(1.05); }
+
+/* progress + volume sliders */
+.x-progressBar-progressBarBg { background-color: var(--spice-button-disabled) !important; }
+.x-progressBar-fillColor { background-color: var(--spice-playback-bar) !important; }
+.playback-bar:hover .x-progressBar-fillColor,
+.main-nowPlayingBar-right:hover .x-progressBar-fillColor { background-color: var(--spice-accent-active) !important; }
+.progress-bar__slider { background-color: var(--spice-accent-active) !important; box-shadow: 0 0 0 2px var(--spice-main); }
+
+/* toggles */
+.x-toggle-indicatorWrapper { background-color: var(--spice-button-disabled) !important; }
+input:checked ~ .x-toggle-indicatorWrapper { background-color: var(--spice-button-secondary) !important; }
+
+/* ── scrollbars ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--spice-rgb-border-inactive), 0.9);
+  border: 2px solid var(--spice-main);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover { background-color: var(--spice-button-secondary); }
+
+/* ── Full App Display (built-in immersive now-playing) ─────────────────────── */
+#full-app-display #fad-background { filter: saturate(0.7) brightness(0.45); }
+#full-app-display #fad-foreground::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(11, 8, 13, 0.75) 100%);
+}
+#full-app-display #fad-art-image {
+  border: 1px solid var(--crimson-border-hot);
+  border-radius: 2px !important;
+  box-shadow: var(--crimson-glow) !important;
+}
+#full-app-display #fad-title {
+  font-family: var(--crimson-pixel) !important;
+  font-weight: 400 !important;
+  color: var(--spice-accent-active) !important;
+  text-shadow: 0 0 26px rgba(141, 36, 69, 0.6);
+}
+#full-app-display #fad-artist,
+#full-app-display #fad-album { color: var(--spice-accent) !important; }
+#full-app-display #fad-release-date,
+#full-app-display #fad-elapsed,
+#full-app-display #fad-duration { font-family: var(--crimson-mono) !important; color: var(--spice-subtext) !important; }
+#full-app-display #fad-progress { background-color: rgba(var(--spice-rgb-border-inactive), 0.9) !important; }
+#full-app-display #fad-progress-inner { background-color: var(--spice-playback-bar) !important; box-shadow: 0 0 10px rgba(192, 72, 95, 0.6); }
+.crimson-reduce-effects #full-app-display #fad-title,
+.crimson-reduce-effects #full-app-display #fad-progress-inner { text-shadow: none; box-shadow: none; }
+
+/* ── performance: strip every transition/animation the theme adds ──────────── */
+.crimson-profile-performance *,
+.crimson-profile-performance *::before,
+.crimson-profile-performance *::after { transition: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation-duration: 0.01ms !important; }
+}

@@ -4,3 +4,4 @@ backups/*
 !backups/.gitkeep
 wallpapers/generated/
 dist/
+spicetify/docs/INSPECTION.md

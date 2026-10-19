@@ -1,0 +1,6 @@
+{
+	"name": "Crimson",
+	"icon": "<svg viewBox=\"0 0 16 16\" fill=\"currentColor\"><path d=\"M8 1 2 8l6 7 6-7-6-7zm0 2.3L12 8l-4 4.7L4 8l4-4.7z\"/><rect x=\"7\" y=\"6\" width=\"2\" height=\"4\"/></svg>",
+	"active-icon": "<svg viewBox=\"0 0 16 16\" fill=\"currentColor\"><path d=\"M8 1 2 8l6 7 6-7-6-7z\"/></svg>",
+	"subfiles": []
+}

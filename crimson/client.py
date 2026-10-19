@@ -19,7 +19,7 @@ def connect(start: bool = False, timeout: float = 4.0) -> socket.socket | None:
         try:
             s.connect(str(paths.SOCKET_PATH))
             return s
-        except (FileNotFoundError, ConnectionRefusedError):
+        except OSError:  # missing / refused / stale socket, path too long, ...
             s.close()
         if not start or time.monotonic() > deadline:
             return None

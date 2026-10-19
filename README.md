@@ -65,6 +65,19 @@ the desktop.
 If Feral **GameMode** is active (Nobara uses it for games), the dashboard drops to the *low* level
 automatically (configurable: `low`, `hide` or `ignore`). It also does this under heavy CPU load.
 
+## Crimson Spotify (Spicetify theme)
+
+Spotify itself can wear the Crimson look and join the same backend. The integration adds a
+custom theme, a "Crimson" sidebar page with the shared synced lyrics and the real spectrum, and
+Spicetify's built-in Full App Display. It is optional and fully reversible.
+
+```bash
+crimsonctl spotify inspect   # read-only check of your Spotify / Spicetify setup
+crimsonctl spotify install   # backup → install → apply → verify (asks before anything needing sudo)
+crimsonctl spotify restore   # back to exactly how it was
+```
+Details, safety model and limitations: [docs/SPOTIFY.md](docs/SPOTIFY.md).
+
 ## Kitty lyrics (`crimson-lyrics`)
 
 The terminal view uses the same backend as the dashboard. Keys:
@@ -108,7 +121,7 @@ PipeWire ──── CAVA ────▶  (asyncio)   ──JSON over unix soc
   resolution (portrait too). If layer-shell isn't available, it falls back to a normal window kept
   below others by a KWin rule.
 
-Details and trade-offs: [docs/DESIGN.md](docs/DESIGN.md). Problems: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+Details and trade-offs: [docs/DESIGN.md](docs/DESIGN.md). Spotify theme: [docs/SPOTIFY.md](docs/SPOTIFY.md). Problems: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
 ## Honest limitations
 
@@ -129,6 +142,7 @@ crimson/            shared backend + clients (core, mpris, lyrics, lrc, audio, s
 dashboard/qml/      QML modules: Theme, Panel, NowPlaying, LyricsPanel, SpectrumBars, CircleViz,
                     Circuit, DataRain, PixelBlob, SysTerm, ClockPanel, Dashboard, MiniCard, hosts
 themes/             KDE colour scheme, Kitty, CAVA, fastfetch
+spicetify/          Crimson Spotify: theme (color.ini, user.css, theme.js), Crimson custom app, manifest
 scripts/            install, apply-theme, restore-theme, uninstall, detect-monitors, pick-wallpapers
 systemd/            user units (crimson-core, crimson-dashboard)
 config/config.toml  documented defaults → ~/.config/crimson-desktop/config.toml

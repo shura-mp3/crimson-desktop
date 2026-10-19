@@ -67,6 +67,7 @@ class Core:
         self._audio_stop_handle: asyncio.TimerHandle | None = None
         self._last_sys: dict = {}
         self.loop: asyncio.AbstractEventLoop | None = None
+        self.bridge = None
 
     # ------------------------------------------------------------------ messaging
     def _broadcast(self, topic: str, msg: dict) -> None:
@@ -336,6 +337,9 @@ class Core:
                 "lyrics_status": self.lyrics.get("status"), "lyrics_source": self.lyrics.get("source"),
                 "offset_ms": self.total_offset(), "ui": self.ui_msg(), "clients": len(self.clients),
                 "audio_running": self.spectrum.running,
+                "bridge": None if not self.bridge else {
+                    "port": self.bridge.port, "listening": self.bridge.server is not None,
+                    "connections": self.bridge.connections, "last_rejected_origin": self.bridge.last_rejected_origin},
             }
         elif cmd == "ping":
             pass
@@ -383,6 +387,10 @@ class Core:
             await self._bind()
         asyncio.create_task(self.mpris.run())
         asyncio.create_task(self._sys_loop())
+        if serve and self.cfg.get("spicetify", {}).get("bridge", True):
+            from .bridge import Bridge
+            self.bridge = Bridge(self, self.cfg["spicetify"])
+            await self.bridge.start()
 
     async def _bind(self) -> None:
         sock_path = paths.SOCKET_PATH

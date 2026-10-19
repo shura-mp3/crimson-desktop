@@ -1,0 +1,69 @@
+{
+  "name": "Crimson Spotify",
+  "description": "Spicetify integration for Crimson Desktop: theme, Crimson custom app, Full App Display, crimson-core bridge.",
+  "managed_by": "crimsonctl spotify (crimson/spotify.py)",
+  "spicetify": {
+    "minimum_tested_config_format": "config-xpui.ini (Setting / AdditionalOptions sections)",
+    "install_source": "https://github.com/spicetify/cli/releases (official release tarball spicetify-<ver>-linux-<arch>.tar.gz; sha256 checked against GitHub's published asset digest when available)",
+    "not_used": "install.sh — it ends by piping the Marketplace installer into sh, which this project does not do",
+    "latest_release_seen_during_research": "v2.44.0 (2026-07-05, adds Spotify 1.2.93 support) — the installer always resolves the current latest release and records the exact version",
+    "license": "LGPL-2.1 (spicetify/cli)"
+  },
+  "components": [
+    {
+      "name": "Crimson (theme)",
+      "type": "theme",
+      "source": "this repository: spicetify/theme/Crimson (color.ini, user.css, theme.js)",
+      "installed_to": "~/.config/spicetify/Themes/Crimson (marked with .crimson-desktop)",
+      "license": "same as the Crimson Desktop repository",
+      "purpose": "palette via --spice-* variables, hairline frames, active/hover states, pixel headings, playback bar, Full App Display styling; theme.js = crimson-core bridge client + live profile classes"
+    },
+    {
+      "name": "Crimson (custom app)",
+      "type": "custom_app",
+      "source": "this repository: spicetify/apps/crimson",
+      "installed_to": "~/.config/spicetify/CustomApps/crimson (marked with .crimson-desktop)",
+      "license": "same as the Crimson Desktop repository",
+      "purpose": "sidebar page: synced lyrics from crimson-core (line / karaoke / word mode), shared per-track offsets, real CAVA spectrum, now-playing info"
+    },
+    {
+      "name": "Full App Display",
+      "type": "extension",
+      "file": "fullAppDisplay.js",
+      "source": "https://github.com/spicetify/cli/blob/main/Extensions/fullAppDisplay.js (ships inside every Spicetify release)",
+      "author": "khanhas (Spicetify)",
+      "license": "LGPL-2.1",
+      "version": "the version bundled with the installed Spicetify release",
+      "purpose": "immersive full-window now-playing: large art, title/artist/album, release date (Spotify's own album metadata via Spicetify.GraphQL), progress, controls",
+      "disable": "crimsonctl spotify disable  (or: spicetify config extensions fullAppDisplay.js- && spicetify apply)"
+    }
+  ],
+  "evaluated_and_not_installed": [
+    {
+      "name": "lyrics-plus (built-in custom app)",
+      "source": "https://github.com/spicetify/cli/tree/main/CustomApps/lyrics-plus",
+      "reason": "Musixmatch provider is on by default with a hard-coded shared user token, and it can use Spotify's internal lyrics endpoint; it would also duplicate crimson-core's LRCLIB lookups and cache. The Crimson app uses crimson-core instead."
+    },
+    {
+      "name": "Popup Lyrics (built-in extension popupLyrics.js)",
+      "source": "https://github.com/spicetify/cli/blob/main/Extensions/popupLyrics.js",
+      "reason": "Providers include Spotify's internal color-lyrics endpoint (spclient.wg.spotify.com), Musixmatch's desktop API with a user token and a third-party Netease proxy."
+    },
+    {
+      "name": "Spicetify Marketplace",
+      "source": "https://github.com/spicetify/spicetify-marketplace",
+      "reason": "Not required; its documented installer is a remote script piped into sh, and it would let unreviewed extensions be added outside this manifest."
+    },
+    {
+      "name": "Community visualizer custom apps",
+      "reason": "Not verified here; in-client visualizers can only use playback metadata, not live audio. Real audio visualization stays in crimson-core (CAVA/PipeWire) and is shown in the Crimson app and dashboard."
+    }
+  ],
+  "bridge": {
+    "endpoint": "ws://127.0.0.1:47811 (loopback only)",
+    "origin_allowlist": ["https://xpui.app.spotify.com"],
+    "client_commands_allowed": ["sub (player/lyrics/ui/toast/spec)", "offset (clamped ±2000 ms)", "ping"],
+    "precedent": "Spicetify's built-in webnowplaying.js connects to ws://localhost:8974",
+    "config": "[spicetify] bridge / bridge_port / allowed_origins in ~/.config/crimson-desktop/config.toml"
+  }
+}

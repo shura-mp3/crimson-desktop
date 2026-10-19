@@ -47,6 +47,14 @@ gamemode_action = "low"
 # Drop to the low profile while the 1-minute load average exceeds (CPU cores x this).
 load_threshold = 0.9
 
+[spicetify]
+# Loopback WebSocket (127.0.0.1 only) that lets the Crimson Spicetify theme inside Spotify read
+# playback/lyrics/spectrum from crimson-core. See docs/SPOTIFY.md.
+bridge = true
+bridge_port = 47811
+# Only Spotify's UI may connect; browser pages are refused.
+allowed_origins = ["https://xpui.app.spotify.com"]
+
 [ui]
 pixelate_lyrics = true
 clock_24h = true

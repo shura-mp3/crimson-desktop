@@ -11,6 +11,8 @@
   crimsonctl doctor                                 check dependencies & environment
   crimsonctl monitors                               show detected monitors
   crimsonctl logs [-f]                              service logs
+  crimsonctl spotify inspect|install|enable|disable|update|restore|status|doctor|verify
+                                                    Crimson Spotify (Spicetify) integration
 """
 
 from __future__ import annotations
@@ -347,6 +349,9 @@ def main(argv: list[str] | None = None) -> None:
         os.execvp(sys.executable, [sys.executable, str(paths.PROJECT_DIR / "scripts" / "detect-monitors.py"), *rest])
     elif cmd == "logs":
         logs("-f" in rest)
+    elif cmd == "spotify":
+        from . import spotify
+        spotify.main(rest)
     else:
         sys.exit(f"unknown command {cmd!r} (see crimsonctl help)")
 

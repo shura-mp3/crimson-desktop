@@ -41,6 +41,11 @@ Profile side effects (Performance turns animations and blur off) are reversible 
 previous values are stored in `~/.local/state/crimson-desktop/profile-saved.json` and restored when
 you switch back to another profile.
 
+## Spotify (Spicetify) integration
+
+Separate backups live in `backups/spicetify/`; restore them with `crimsonctl spotify restore`.
+See [SPOTIFY.md](SPOTIFY.md).
+
 ## Removing the dashboard itself
 
 ```bash

@@ -56,6 +56,12 @@ DEFAULTS: dict[str, Any] = {
         # Reduce effects automatically when the 1-minute load average exceeds cores * this.
         "load_threshold": 0.9,
     },
+    "spicetify": {
+        # loopback WebSocket that lets the Crimson Spicetify theme read playback/lyrics state
+        "bridge": True,
+        "bridge_port": 47811,
+        "allowed_origins": ["https://xpui.app.spotify.com"],
+    },
     "ui": {
         "pixelate_lyrics": True,
         "clock_24h": True,
