@@ -78,6 +78,23 @@ crimsonctl spotify restore   # back to exactly how it was
 ```
 Details, safety model and limitations: [docs/SPOTIFY.md](docs/SPOTIFY.md).
 
+## Crimson Terminal OS (`crimson`, in Konsole)
+
+A full-screen cyberpunk command centre for Konsole with six modules: Home dashboard, Music
+(Spotify, synced lyrics and the real CAVA spectrum, all through crimson-core), system Monitor,
+Files, Commands (fuzzy app launcher) and Theme/settings. It can open automatically in new Konsole
+windows; quitting it (`Ctrl+Q`) leaves you at your normal shell prompt. SSH, scripts, IDE terminals
+and other terminal emulators are never affected.
+
+```bash
+bash terminal-os/scripts/install.sh   # user-level, no sudo; asks before touching Konsole
+crimson                               # open it   (crimson --doctor checks everything)
+crimson-autostart off                 # stop auto-start (pure sh — works even if Python breaks)
+```
+![Crimson Terminal OS](docs/screenshots/terminal-os/home.png)
+
+Keys, auto-start safety, scripts, backups and troubleshooting: [docs/TERMINAL-OS.md](docs/TERMINAL-OS.md).
+
 ## Kitty lyrics (`crimson-lyrics`)
 
 The terminal view uses the same backend as the dashboard. Keys:
@@ -150,7 +167,10 @@ fonts/              Jersey 10/15, VT323, Silkscreen, Pixelify Sans, Space Mono (
 wallpapers/         procedural crimson fallback (+ generated/ after apply-theme)
 backups/            timestamped theme backups with manifest + action log
 tests/              unit tests, fake Spotify (MPRIS), mock LRCLIB, KDE tool stubs
+terminal-os/        Crimson Terminal OS: crimson_tos/ (Textual app), bin/ (crimson, crimson-konsole,
+                    crimson-autostart), konsole/ (colour scheme + profiles), scripts/, tests/
 ```
 
-Run the tests: `python3 -m unittest discover -s tests`. Preview without Spotify:
+Run the tests: `python3 -m unittest discover -s tests` and
+`terminal-os/.venv/bin/python -m unittest discover -s terminal-os/tests`. Preview without Spotify:
 `bin/crimson-dashboard --demo --mode window`.

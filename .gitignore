@@ -5,3 +5,4 @@ backups/*
 wallpapers/generated/
 dist/
 spicetify/docs/INSPECTION.md
+terminal-os/.venv/

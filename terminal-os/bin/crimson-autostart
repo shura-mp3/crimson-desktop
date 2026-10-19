@@ -1,0 +1,126 @@
+#!/bin/sh
+# crimson-autostart on|off|status — open Crimson Terminal OS automatically in new Konsole windows.
+#
+# Pure POSIX sh + awk (no Python, no KDE tools needed) so `crimson-autostart off` always works.
+#   on      make "Crimson OS" Konsole's default profile (previous default remembered, konsolerc backed up)
+#   off     put the previous default profile back + drop the disable flag (takes effect immediately,
+#           even in Konsole windows that are already open)
+#   status  show what is configured
+# Emergency without this script:   touch ~/.config/crimson-desktop/terminal-os.autostart-disabled
+set -u
+
+CONF="${XDG_CONFIG_HOME:-$HOME/.config}"
+DATA="${XDG_DATA_HOME:-$HOME/.local/share}"
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/crimson-desktop"
+KONSOLERC="$CONF/konsolerc"
+PROFILE_NAME="Crimson OS.profile"
+PROFILE="$DATA/konsole/$PROFILE_NAME"
+FLAG="$CONF/crimson-desktop/terminal-os.autostart-disabled"
+PREV="$STATE/terminal-os.prev-default-profile"
+FAILS="$STATE/terminal-os.failures"
+BACKUPS="$STATE/backups/terminal-os"
+GROUP="Desktop Entry"
+KEY="DefaultProfile"
+
+if [ -t 1 ]; then c1='\033[38;2;213;139;159m' c2='\033[38;2;224;108;132m' c0='\033[0m'; else c1='' c2='' c0=''; fi
+say() { printf "${c1}◢◤${c0} %s\n" "$*"; }
+die() { printf "${c2}✘${c0} %s\n" "$*" >&2; exit 1; }
+
+# ini_get FILE GROUP KEY  -> value (empty if missing)
+ini_get() {
+    [ -f "$1" ] || return 0
+    awk -v g="[$2]" -v k="$3" '
+        /^\[/ { in_g = ($0 == g); next }
+        in_g { i = index($0, "="); if (i && substr($0, 1, i - 1) == k) { print substr($0, i + 1); exit } }
+    ' "$1"
+}
+
+# ini_set FILE GROUP KEY VALUE   (VALUE "" with DELETE=1 removes the key). Atomic, keeps everything else.
+ini_set() {
+    f="$1"; tmp="$f.crimson-tmp.$$"
+    mkdir -p "$(dirname "$f")"
+    [ -f "$f" ] || : > "$f"
+    awk -v g="[$2]" -v k="$3" -v v="$4" -v del="${DELETE:-0}" '
+        function emit() { if (!done && !del) print k "=" v; done = 1 }
+        /^\[/ { if (in_g) emit(); in_g = ($0 == g); if (in_g) seen = 1; print; next }
+        in_g { i = index($0, "="); if (i && substr($0, 1, i - 1) == k) { emit(); next } }
+        { print }
+        END { if (in_g) emit(); else if (!seen && !del) { if (NR) print ""; print g; print k "=" v } }
+    ' "$f" > "$tmp" || { rm -f "$tmp"; return 1; }
+    # awk emits the key at the end of its group; trailing blank lines inside the group stay where they were
+    cat "$tmp" > "$f" && rm -f "$tmp"
+}
+
+backup_konsolerc() {
+    ts="$(date +%Y%m%d-%H%M%S)"
+    d="$BACKUPS/$ts-autostart-$1"
+    mkdir -p "$d" || die "can't create backup dir $d"
+    if [ -f "$KONSOLERC" ]; then
+        cp -p "$KONSOLERC" "$d/konsolerc"
+        printf '%s\texisted\t%s\n' "$KONSOLERC" "konsolerc" > "$d/manifest.tsv"
+    else
+        printf '%s\tabsent\t-\n' "$KONSOLERC" > "$d/manifest.tsv"
+    fi
+    printf 'crimson-autostart %s  %s\n' "$1" "$(date '+%F %T')" > "$d/README"
+    say "backup: $d"
+}
+
+cmd_status() {
+    cur="$(ini_get "$KONSOLERC" "$GROUP" "$KEY")"
+    printf 'konsole default profile : %s\n' "${cur:-(built-in default)}"
+    printf 'Crimson OS profile      : %s\n' "$([ -f "$PROFILE" ] && echo "installed ($PROFILE)" || echo "not installed")"
+    printf 'disable flag            : %s\n' "$([ -e "$FLAG" ] && echo "present ($FLAG)" || echo "absent")"
+    printf 'recent failed launches  : %s\n' "$(cat "$FAILS" 2>/dev/null || echo 0)"
+    if [ "$cur" = "$PROFILE_NAME" ] && [ ! -e "$FLAG" ]; then
+        echo "auto-start              : ON"
+    else
+        echo "auto-start              : off"
+    fi
+}
+
+cmd_on() {
+    if [ ! -f "$PROFILE" ]; then
+        here="$(dirname "$(readlink -f "$0")")"
+        theme="$here/../scripts/konsole-theme.sh"
+        [ -f "$theme" ] || theme="$(dirname "$(readlink -f "$HOME/.local/bin/crimson" 2>/dev/null || echo /nonexistent)")/../scripts/konsole-theme.sh"
+        [ -f "$theme" ] || die "Konsole profile '$PROFILE_NAME' is missing; run terminal-os/scripts/konsole-theme.sh apply first"
+        bash "$theme" apply --yes || die "installing the Konsole profile failed"
+    fi
+    cur="$(ini_get "$KONSOLERC" "$GROUP" "$KEY")"
+    mkdir -p "$STATE"
+    if [ "$cur" != "$PROFILE_NAME" ]; then
+        backup_konsolerc on
+        printf '%s\n' "${cur:-__none__}" > "$PREV"
+        ini_set "$KONSOLERC" "$GROUP" "$KEY" "$PROFILE_NAME" || die "couldn't write $KONSOLERC"
+    fi
+    rm -f "$FLAG" "$FAILS"
+    say "auto-start ON — new Konsole windows open Crimson OS (quit it to get your normal shell)."
+    say "close every open Konsole window once so Konsole re-reads its default profile."
+    say "bypass once: CRIMSON_NO_AUTOSTART=1 konsole    ·    turn off: crimson-autostart off"
+}
+
+cmd_off() {
+    mkdir -p "$(dirname "$FLAG")" && : > "$FLAG"
+    cur="$(ini_get "$KONSOLERC" "$GROUP" "$KEY")"
+    if [ "$cur" = "$PROFILE_NAME" ]; then
+        backup_konsolerc off
+        prev="$(cat "$PREV" 2>/dev/null || echo __none__)"
+        if [ "$prev" = "__none__" ] || [ -z "$prev" ] || [ "$prev" = "$PROFILE_NAME" ]; then
+            DELETE=1 ini_set "$KONSOLERC" "$GROUP" "$KEY" "" || die "couldn't write $KONSOLERC"
+            say "Konsole default profile reset to the built-in default"
+        else
+            ini_set "$KONSOLERC" "$GROUP" "$KEY" "$prev" || die "couldn't write $KONSOLERC"
+            say "Konsole default profile restored to: $prev"
+        fi
+    fi
+    rm -f "$PREV"
+    say "auto-start OFF (flag: $FLAG). Run 'crimson' any time to open Crimson OS by hand."
+}
+
+case "${1:-status}" in
+    on|enable) cmd_on ;;
+    off|disable) cmd_off ;;
+    status) cmd_status ;;
+    -h|--help|help) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//' ;;
+    *) die "usage: crimson-autostart on|off|status" ;;
+esac

@@ -1,0 +1,178 @@
+/* Crimson Terminal OS — Textual stylesheet. Palette shared with Crimson Desktop. */
+
+$cr-bg: #0B080D;
+$cr-bg2: #120B12;
+$cr-burgundy: #230B17;
+$cr-panel: #190D16;
+$cr-crimson: #8D2445;
+$cr-bright: #B83259;
+$cr-rose: #C0485F;
+$cr-dusty: #D58B9F;
+$cr-pale: #F2B7C5;
+$cr-text: #F4E8ED;
+$cr-muted: #A88B98;
+$cr-line: #482033;
+
+Screen {
+    background: $cr-bg;
+    color: $cr-text;
+    layers: base overlay;
+}
+
+/* ── header ─────────────────────────────────────────────── */
+CrimsonHeader {
+    dock: top;
+    height: 2;
+    background: $cr-bg2;
+    color: $cr-text;
+    border-bottom: solid $cr-line;
+}
+StatusBar {
+    dock: bottom;
+    height: 1;
+    background: $cr-bg2;
+    color: $cr-muted;
+}
+
+/* ── panels ─────────────────────────────────────────────── */
+.panel {
+    background: $cr-panel 85%;
+    border: round $cr-line;
+    border-title-color: $cr-dusty;
+    border-title-style: bold;
+    border-subtitle-color: $cr-muted;
+    padding: 0 1;
+}
+.panel:focus-within {
+    border: round $cr-crimson;
+    border-title-color: $cr-pale;
+}
+/* compact mode: no inner padding, no decorative panel */
+.compact .panel { padding: 0; }
+.compact #signal { display: none; }
+.accent-rose .panel:focus-within { border: round $cr-rose; }
+.accent-dusty .panel:focus-within { border: round $cr-dusty; }
+
+.muted { color: $cr-muted; }
+.dim { color: $cr-line; }
+.pale { color: $cr-pale; }
+.title { color: $cr-pale; text-style: bold; }
+
+/* ── home grid (columns set by the screen from terminal width) ── */
+#home-grid {
+    layout: grid;
+    grid-size: 3;
+    grid-columns: 1fr 1fr 1fr;
+    grid-rows: 11 12 1fr;
+    height: 1fr;
+    min-height: 30;
+    grid-gutter: 0 1;
+    padding: 0 1;
+    height: auto;
+}
+/* explicit row heights: Textual's `auto` rows over-allocate here */
+#home-grid.cols-2 { grid-size: 2; grid-columns: 1fr 1fr; grid-rows: 11 11 12 12 1fr; min-height: 53; }
+#home-grid.cols-1 { grid-size: 1; grid-columns: 1fr; grid-rows: 11 11 11 12 12 1fr; min-height: 64; }
+#home-grid .panel { height: 11; }
+#home-grid #hardware, #home-grid #quick { height: 12; }
+#home-grid #signal { height: 1fr; min-height: 5; }
+.span-2 { column-span: 2; }
+.span-3 { column-span: 3; }
+#home-grid.cols-2 .span-3 { column-span: 2; }
+#home-grid.cols-1 .span-2, #home-grid.cols-1 .span-3 { column-span: 1; }
+
+/* ── widgets ───────────────────────────────────────────── */
+Sparkline { height: 3; margin: 0 0; }
+Sparkline > .sparkline--max-color { color: $cr-pale; }
+Sparkline > .sparkline--min-color { color: $cr-crimson; }
+
+OptionList {
+    background: transparent;
+    border: none;
+    height: auto;
+    max-height: 100%;
+    scrollbar-color: $cr-crimson;
+    scrollbar-background: $cr-bg2;
+}
+OptionList > .option-list--option-highlighted {
+    background: $cr-crimson 60%;
+    color: $cr-text;
+    text-style: bold;
+}
+OptionList:focus > .option-list--option-highlighted { background: $cr-crimson; }
+
+DataTable {
+    background: transparent;
+    scrollbar-color: $cr-crimson;
+    scrollbar-background: $cr-bg2;
+    height: 1fr;
+}
+DataTable > .datatable--header { background: $cr-burgundy; color: $cr-dusty; text-style: bold; }
+DataTable > .datatable--cursor { background: $cr-crimson; color: $cr-text; }
+DataTable:focus > .datatable--cursor { background: $cr-bright; }
+DataTable > .datatable--hover { background: $cr-burgundy; }
+
+Input {
+    background: $cr-bg2;
+    border: tall $cr-line;
+    color: $cr-text;
+    padding: 0 1;
+}
+Input:focus { border: tall $cr-crimson; }
+Input > .input--placeholder { color: $cr-muted; }
+
+Button {
+    background: $cr-burgundy;
+    color: $cr-pale;
+    border: tall $cr-line;
+    min-width: 10;
+    height: 3;
+}
+Button:hover { background: $cr-crimson; }
+Button:focus { border: tall $cr-dusty; text-style: bold; }
+Button.-primary { background: $cr-crimson; }
+
+Switch { background: $cr-bg2; border: tall $cr-line; }
+Switch > .switch--slider { color: $cr-line; background: $cr-bg2; }
+Switch.-on > .switch--slider { color: $cr-dusty; }
+Switch:focus { border: tall $cr-crimson; }
+
+Select { width: 26; }
+Select > SelectCurrent { background: $cr-bg2; border: tall $cr-line; }
+Select:focus > SelectCurrent { border: tall $cr-crimson; }
+SelectOverlay { background: $cr-panel; border: round $cr-crimson; }
+
+TabbedContent { height: 1fr; }
+Tabs { background: $cr-bg2; }
+Tab { color: $cr-muted; }
+Tab.-active { color: $cr-pale; text-style: bold; }
+Underline > .underline--bar { color: $cr-crimson; background: $cr-line; }
+
+ProgressBar Bar > .bar--bar { color: $cr-rose; background: $cr-line; }
+
+/* ── modals ────────────────────────────────────────────── */
+ModalScreen { background: $cr-bg 70%; align: center middle; }
+.dialog {
+    background: $cr-panel;
+    border: round $cr-crimson;
+    border-title-color: $cr-pale;
+    border-title-style: bold;
+    padding: 1 2;
+    width: 70;
+    max-width: 95%;
+    height: auto;
+    max-height: 90%;
+}
+.dialog Horizontal { height: auto; align-horizontal: right; margin-top: 1; }
+.dialog Button { margin-left: 1; }
+
+/* ── command palette (Textual's, restyled) ─────────────── */
+CommandPalette > Vertical { background: $cr-panel; border: round $cr-crimson; }
+CommandInput { background: $cr-bg2; }
+
+/* ── splash ────────────────────────────────────────────── */
+SplashScreen { align: center middle; background: $cr-bg; }
+#splash { width: auto; height: auto; content-align: center middle; text-align: center; }
+
+Toast { background: $cr-panel; border-left: wide $cr-crimson; color: $cr-text; }
+Toast.-error { border-left: wide $cr-rose; }

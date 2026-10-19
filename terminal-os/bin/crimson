@@ -1,0 +1,11 @@
+#!/bin/sh
+# crimson — start Crimson Terminal OS (see `crimson --help`). Uses terminal-os/.venv made by install.sh.
+HERE="$(dirname "$(readlink -f "$0")")"
+TOS="$(cd "$HERE/.." && pwd)"
+PROJECT="$(cd "$TOS/.." && pwd)"
+PY="${CRIMSON_TOS_PYTHON:-$TOS/.venv/bin/python}"
+if [ ! -x "$PY" ]; then
+    echo "crimson: $PY not found — run: bash $TOS/scripts/install.sh" >&2
+    exit 3
+fi
+PYTHONPATH="$PROJECT:$TOS${PYTHONPATH:+:$PYTHONPATH}" exec "$PY" -m crimson_tos "$@"

@@ -1,0 +1,24 @@
+# Crimson Desktop — opens Crimson Terminal OS, then your normal shell when you quit it.
+# Template: @VARS@ are filled in by terminal-os/scripts/konsole-theme.sh.
+[Appearance]
+ColorScheme=Crimson
+Font=JetBrains Mono,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+UseFontLineChararacters=true
+
+[Cursor Options]
+CursorShape=1
+
+[General]
+Command=@WRAPPER@
+Name=Crimson OS
+Parent=FALLBACK/
+TerminalColumns=140
+TerminalRows=40
+TerminalMargin=6
+
+[Scrolling]
+HistoryMode=2
+ScrollBarPosition=2
+
+[Terminal Features]
+BlinkingCursorEnabled=true

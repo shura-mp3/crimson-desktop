@@ -1,0 +1,5 @@
+# Crimson Terminal OS — installed into terminal-os/.venv by scripts/install.sh (never system-wide)
+textual>=8.0,<9
+rich>=13.7
+psutil>=5.9
+pillow>=10.0

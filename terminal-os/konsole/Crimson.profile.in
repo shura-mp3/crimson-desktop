@@ -1,0 +1,23 @@
+# Crimson Desktop — plain-shell Konsole profile with the Crimson colours (no auto-start).
+# Template: @VARS@ are filled in by terminal-os/scripts/konsole-theme.sh.
+[Appearance]
+ColorScheme=Crimson
+Font=JetBrains Mono,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+UseFontLineChararacters=true
+
+[Cursor Options]
+CursorShape=1
+
+[General]
+Name=Crimson
+Parent=FALLBACK/
+TerminalColumns=140
+TerminalRows=40
+TerminalMargin=6
+
+[Scrolling]
+HistoryMode=2
+ScrollBarPosition=2
+
+[Terminal Features]
+BlinkingCursorEnabled=true

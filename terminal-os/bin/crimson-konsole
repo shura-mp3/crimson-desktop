@@ -1,0 +1,87 @@
+#!/bin/sh
+# crimson-konsole — the Command of Konsole's "Crimson OS" profile.
+#
+# Starts Crimson Terminal OS in a fresh interactive Konsole session, then ALWAYS hands the
+# session to your normal login shell. Pure POSIX sh on purpose: it must keep working when
+# Python, the venv or the project directory is broken or gone.
+#
+# Falls straight through to your shell (no Crimson OS) when:
+#   CRIMSON_NO_AUTOSTART is set        one-off bypass:  CRIMSON_NO_AUTOSTART=1 konsole
+#   CRIMSON_TOS_ACTIVE is set          recursion guard (Konsole started from inside Crimson OS)
+#   the disable flag file exists       crimson-autostart off   (or just touch the file)
+#   stdin/stdout is not a terminal, TERM=dumb, or this is an SSH session
+#   the parent is not Konsole itself   e.g. the terminal panel embedded in Dolphin/Kate/KDevelop
+#   3 launches in a row failed         auto-start pauses itself; `crimson-autostart on` re-arms it
+
+CONF="${XDG_CONFIG_HOME:-$HOME/.config}/crimson-desktop"
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/crimson-desktop"
+FLAG="$CONF/terminal-os.autostart-disabled"
+FAILS="$STATE/terminal-os.failures"
+MAX_FAILS=3
+
+pick_shell() {
+    sh_="${SHELL:-}"
+    if [ -z "$sh_" ] || [ ! -x "$sh_" ]; then
+        sh_="$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f7)"
+    fi
+    if [ -z "$sh_" ] || [ ! -x "$sh_" ] || [ "$(basename "$sh_")" = crimson-konsole ]; then
+        sh_=/bin/sh
+    fi
+    printf '%s' "$sh_"
+}
+
+to_shell() {
+    unset CRIMSON_TOS_ACTIVE
+    SHELL="$(pick_shell)"
+    export SHELL
+    exec "$SHELL"
+}
+
+parent_is_konsole() {
+    pp="$(cat "/proc/$PPID/comm" 2>/dev/null || ps -o comm= -p "$PPID" 2>/dev/null)"
+    case "$pp" in
+        konsole|konsole.*|*/konsole) return 0 ;;
+        "") return 0 ;;   # can't tell (no /proc, no ps): Konsole is the only thing that runs this profile
+        *) return 1 ;;
+    esac
+}
+
+find_launcher() {
+    for c in "${CRIMSON_TOS_LAUNCHER:-}" "$HOME/.local/bin/crimson" "$HOME/.local/bin/crimson-os"; do
+        [ -n "$c" ] && [ -x "$c" ] && { printf '%s' "$c"; return 0; }
+    done
+    return 1
+}
+
+[ -n "${CRIMSON_NO_AUTOSTART:-}" ] && to_shell
+[ -n "${CRIMSON_TOS_ACTIVE:-}" ] && to_shell
+[ -e "$FLAG" ] && to_shell
+[ -t 0 ] && [ -t 1 ] || to_shell
+[ "${TERM:-dumb}" = dumb ] && to_shell
+[ -n "${SSH_CONNECTION:-}${SSH_TTY:-}" ] && to_shell
+parent_is_konsole || to_shell
+
+LAUNCHER="$(find_launcher)" || {
+    printf '\033[38;2;213;139;159m◢◤ Crimson OS:\033[0m launcher not found (~/.local/bin/crimson). Starting your shell.\n'
+    printf '   reinstall: bash <project>/terminal-os/scripts/install.sh   ·   disable: crimson-autostart off\n\n'
+    to_shell
+}
+
+CRIMSON_TOS_ACTIVE=1 "$LAUNCHER" --from-konsole
+rc=$?
+
+# 0 = normal quit, 130 = Ctrl+C before the UI was up: both are the user's choice, not failures.
+if [ "$rc" -eq 0 ] || [ "$rc" -eq 130 ]; then
+    rm -f "$FAILS" 2>/dev/null
+else
+    n=$(( $(cat "$FAILS" 2>/dev/null || echo 0) + 1 ))
+    mkdir -p "$STATE" 2>/dev/null && echo "$n" > "$FAILS" 2>/dev/null
+    printf '\n\033[38;2;224;108;132m◢◤ Crimson OS exited with an error (code %s).\033[0m You are in your normal shell.\n' "$rc"
+    printf '   diagnose: crimson --doctor   ·   log: %s/terminal-os.log   ·   disable: crimson-autostart off\n' "$STATE"
+    if [ "$n" -ge "$MAX_FAILS" ]; then
+        mkdir -p "$CONF" 2>/dev/null && : > "$FLAG"
+        printf '   auto-start paused after %s failed launches in a row. Re-enable: crimson-autostart on\n' "$n"
+    fi
+    printf '\n'
+fi
+to_shell
