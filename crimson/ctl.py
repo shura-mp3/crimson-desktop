@@ -10,6 +10,7 @@
   crimsonctl play-pause | next | prev
   crimsonctl doctor                                 check dependencies & environment
   crimsonctl monitors                               show detected monitors
+  crimsonctl display                                monitors + scaling + what the dashboard renders at
   crimsonctl logs [-f]                              service logs
   crimsonctl spotify inspect|install|enable|disable|update|restore|status|doctor|verify
                                                     Crimson Spotify (Spicetify) integration
@@ -291,6 +292,22 @@ def logs(follow: bool) -> None:
               + (["-f"] if follow else []))
 
 
+def display() -> None:
+    """Read-only: KDE's monitor table (resolution, scale, position) next to what the dashboard reports."""
+    subprocess.run([sys.executable, str(paths.PROJECT_DIR / "scripts" / "detect-monitors.py")])
+    print("\ndashboard (from its log, newest last):")
+    try:
+        out = subprocess.run(["journalctl", "--user", "-u", "crimson-dashboard", "-n", "400", "--no-hostname", "-o", "cat"],
+                             capture_output=True, text=True).stdout
+    except OSError:
+        out = ""
+    lines = [ln for ln in out.splitlines() if "dashboard window:" in ln or ln.startswith("INFO crimson.dashboard: screen ")
+             or "display mode:" in ln]
+    print("\n".join("  " + ln.split(": ", 1)[-1] for ln in lines[-8:]) or "  (no log yet: crimsonctl restart, wait a few seconds, run this again)")
+    print("\nThe dashboard renders at the monitor's full physical resolution; fractional scales (1.25, 1.5…) are fine.\n"
+          "Measure its cost on your GPU:  crimson-dashboard --demo --stats 10   (opens a temporary preview window)")
+
+
 def open_lyrics() -> None:
     lyr = str(paths.PROJECT_DIR / "bin" / "crimson-lyrics")
     if sys.stdin.isatty() and os.environ.get("TERM"):
@@ -347,6 +364,8 @@ def main(argv: list[str] | None = None) -> None:
         doctor()
     elif cmd == "monitors":
         os.execvp(sys.executable, [sys.executable, str(paths.PROJECT_DIR / "scripts" / "detect-monitors.py"), *rest])
+    elif cmd == "display":
+        display()
     elif cmd == "logs":
         logs("-f" in rest)
     elif cmd == "spotify":

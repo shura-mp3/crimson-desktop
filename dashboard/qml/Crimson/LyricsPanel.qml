@@ -118,33 +118,44 @@ Item {
         anchors.margins: Theme.px(24)
         visible: root.fallbackTitle === "" && !root.wordMode
 
+        // where the active line's glyphs actually start/end (the item is taller than its text when
+        // a short line is fitted), so the neighbouring lines sit a constant distance from the words
+        readonly property real glyphTop: current.y + Math.max(0, (current.height - current.contentHeight) / 2)
+        readonly property real glyphBottom: current.y + current.height - Math.max(0, (current.height - current.contentHeight) / 2)
+
         Text {
             id: prevLine
-            anchors { left: parent.left; right: parent.right; bottom: current.top; bottomMargin: Theme.px(4) }
+            anchors { left: parent.left; right: parent.right }
+            y: Math.max(0, lineView.glyphTop - height - Theme.px(14))
             horizontalAlignment: Text.AlignHCenter
             text: root.lineText(root.idx - 1)
             font.family: Theme.pixelFont; font.pixelSize: Theme.px(30)
-            color: Theme.muted; opacity: 0.45
+            color: Theme.muted; opacity: 0.55
             elide: Text.ElideRight
         }
         PixelText {
             id: current
-            anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter; verticalCenterOffset: -Theme.px(10) }
-            height: parent.height * 0.52
+            anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter; verticalCenterOffset: -Theme.px(6) }
+            height: parent.height * 0.56
             textFormat: root.cur && root.cur.w ? Text.StyledText : Text.PlainText
             text: root.idx < 0 ? (root.track.title || "") : (root.cur && root.cur.w ? root.karaoke(root.cur, root.wordIdx) : root.lineText(root.idx))
-            font.pixelSize: Theme.px(120)
+            // oversized; Fit shrinks long lines (wrapping onto up to 3 lines) but never below a readable size
+            font.pixelSize: Theme.px(150)
+            font.letterSpacing: Theme.px(1)
             fontSizeMode: Text.Fit
+            minimumPixelSize: Theme.px(36)
             wrapMode: Text.WordWrap
             maximumLineCount: 3
-            lineHeight: 0.9
+            elide: Text.ElideRight
+            lineHeight: 0.92
             pixelSize: Theme.px(2.5)
             color: root.idx < 0 ? Theme.dusty : Theme.pale
             transform: Translate { id: curShift; y: 0 }
         }
         Column {
-            anchors { left: parent.left; right: parent.right; top: current.bottom; topMargin: Theme.px(6) }
-            spacing: Theme.px(2)
+            anchors { left: parent.left; right: parent.right }
+            y: Math.min(parent.height - height, lineView.glyphBottom + Theme.px(14))
+            spacing: Theme.px(4)
             Repeater {
                 model: 2
                 Text {
@@ -153,7 +164,7 @@ Item {
                     text: root.lineText(root.idx + 1 + index)
                     font.family: Theme.pixelFont; font.pixelSize: Theme.px(index === 0 ? 34 : 26)
                     color: index === 0 ? Theme.dusty : Theme.muted
-                    opacity: index === 0 ? 0.8 : 0.4
+                    opacity: index === 0 ? 0.85 : 0.5
                     elide: Text.ElideRight
                 }
             }

@@ -234,9 +234,11 @@ def make_backend_classes():
 [00:15.00]Is it love or is it noise
 [00:19.00]Or can I just be myself?
 [00:24.00]Everything, everything
+[00:27.00]And if the night keeps calling out my name across the static I will answer every time
 """
 
-        def __init__(self, start_ms: int = 5900, art: str = "", lyrics_status: str = "synced", display: str = "auto"):
+        def __init__(self, start_ms: int = 5900, art: str = "", lyrics_status: str = "synced", display: str = "auto",
+                     style: str = "crisp", perf_level: str = "balanced", playing: bool = True):
             super().__init__()
             from . import lrc
             self.t0 = time.time() * 1000 - start_ms
@@ -244,10 +246,11 @@ def make_backend_classes():
             self._lyrics = {"status": lyrics_status, "source": "demo", "lines": parsed["lines"] if lyrics_status == "synced" else [],
                             "has_words": parsed["has_words"], "offset_ms": 0, "lrc_offset": 0}
             self._art = art
-            perf = config.PERFORMANCE["balanced"]
-            self._ui = {"visible": True, "perf": perf, "effective_performance": "balanced", "audio_available": True,
-                        "audio_source": "system", "display_mode": display, "ui_cfg": config.DEFAULTS["ui"], "demo": True}
-            self._player = {"available": True, "player": "spotify", "status": "Playing", "playing": True,
+            perf = config.PERFORMANCE[perf_level]
+            self._ui = {"visible": True, "perf": perf, "effective_performance": perf_level, "audio_available": True,
+                        "audio_source": "system", "display_mode": display, "demo": True,
+                        "ui_cfg": dict(config.DEFAULTS["ui"], lyrics_style=style)}
+            self._player = {"available": True, "player": "spotify", "status": "Playing" if playing else "Paused", "playing": playing,
                             "track": {"id": "demo", "title": "Everything You Are", "artist": "Crimson Test",
                                       "album": "Signal Lost", "length_ms": 30000, "art_url": ""},
                             "pos_ms": start_ms, "anchor_wall": time.time() * 1000}
@@ -299,9 +302,14 @@ def main() -> None:
     ap.add_argument("--demo-pos", type=int, default=5900)
     ap.add_argument("--demo-display", default="auto", help="demo lyric display mode: auto|line|word")
     ap.add_argument("--demo-art", default="")
+    ap.add_argument("--demo-style", default="crisp", choices=["crisp", "retro"], help="demo lyric typography")
+    ap.add_argument("--demo-perf", default="balanced", choices=["low", "balanced", "high"], help="demo performance profile")
+    ap.add_argument("--demo-paused", action="store_true", help="demo with playback paused")
     ap.add_argument("--size", help="window size WxH (testing)")
     ap.add_argument("--screenshot", help="render, save PNG to this path and exit")
     ap.add_argument("--screenshot-delay", type=int, default=2500)
+    ap.add_argument("--stats", type=float, metavar="SECONDS",
+                    help="measure for SECONDS: frames drawn, fps, CPU time, screen scale; then exit")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO, format="%(levelname)s %(name)s: %(message)s")
@@ -344,7 +352,8 @@ def main() -> None:
         QFontDatabase.addApplicationFont(str(f))
 
     _, SocketBackend, DemoBackend = make_backend_classes()
-    backend = DemoBackend(args.demo_pos, args.demo_art, args.demo_state, args.demo_display) if args.demo else SocketBackend()
+    backend = (DemoBackend(args.demo_pos, args.demo_art, args.demo_state, args.demo_display, args.demo_style,
+                           args.demo_perf, not args.demo_paused) if args.demo else SocketBackend())
 
     screen = pick_screen(app, args.monitor or cfg["dashboard"].get("monitor", "auto"))
     engine = QQmlApplicationEngine()
@@ -407,6 +416,38 @@ def main() -> None:
     app.screenRemoved.connect(screens_changed)
 
     win.show()
+
+    def log_geometry():  # `crimsonctl display` reads this line from the journal
+        from PySide6.QtCore import qVersion
+        dpr = win.devicePixelRatio()
+        log.info("dashboard window: %dx%d logical x scale %g = %dx%d physical on %s (Qt %s, layout %s, mode %s)",
+                 win.width(), win.height(), dpr, round(win.width() * dpr), round(win.height() * dpr),
+                 screen.name(), qVersion(), layout, mode)
+    QTimer.singleShot(1500, log_geometry)
+    if args.stats:
+        import resource
+        frames = [0]
+        win.frameSwapped.connect(lambda: frames.__setitem__(0, frames[0] + 1))
+
+        def cpu() -> float:
+            r = resource.getrusage(resource.RUSAGE_SELF)
+            return r.ru_utime + r.ru_stime
+
+        start = [0.0, 0.0, 0]
+
+        def begin():
+            start[:] = [time.monotonic(), cpu(), frames[0]]
+
+        def report():
+            wall, used, n = time.monotonic() - start[0], cpu() - start[1], frames[0] - start[2]
+            print(f"stats: {n} frames in {wall:.1f}s = {n / wall:.1f} fps | CPU {used:.2f}s ({100 * used / wall:.0f}% of one core)"
+                  f" | window {win.width()}x{win.height()} logical, scale {win.devicePixelRatio():g}"
+                  f" → {round(win.width() * win.devicePixelRatio())}x{round(win.height() * win.devicePixelRatio())} physical"
+                  f" | screen {screen.name()}", flush=True)
+            app.exit(0)
+
+        QTimer.singleShot(2000, begin)                       # skip start-up
+        QTimer.singleShot(int(2000 + args.stats * 1000), report)
     if args.screenshot:
         def grab():
             try:

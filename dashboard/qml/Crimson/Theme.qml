@@ -35,7 +35,7 @@ QtObject {
     property bool borderAnim: false
     property bool visibleUi: true
     property bool playing: false
-    property bool pixelate: true
+    property string lyricStyle: "crisp"  // crisp | retro (see PixelText.qml)
 
     // decorative animations only run while visible + music playing
     readonly property bool animateDecor: visibleUi && decor && playing

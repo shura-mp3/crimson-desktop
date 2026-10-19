@@ -63,7 +63,11 @@ DEFAULTS: dict[str, Any] = {
         "allowed_origins": ["https://xpui.app.spotify.com"],
     },
     "ui": {
-        "pixelate_lyrics": True,
+        # "crisp": the pixel font drawn sharp at the screen's real resolution (default).
+        # "retro": extra chunky nearest-neighbour blocks. (Replaces the old pixelate_lyrics key,
+        # which is still accepted in config files but no longer changes the renderer.)
+        "lyrics_style": "crisp",
+        "pixelate_lyrics": False,
         "clock_24h": True,
         "username": "",
         "show_matrix": True,

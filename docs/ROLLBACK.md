@@ -41,6 +41,20 @@ Profile side effects (Performance turns animations and blur off) are reversible 
 previous values are stored in `~/.local/state/crimson-desktop/profile-saved.json` and restored when
 you switch back to another profile.
 
+## Lyric rendering (dashboard typography)
+
+The sharper lyric renderer touches only the dashboard: `dashboard/qml/Crimson/PixelText.qml`,
+`LyricsPanel.qml`, `Theme.qml` and `HostBindings.qml`. It also adds the `lyrics_style` option (in
+`crimson/config.py` and `config/config.toml`) and the `--stats`, `--demo-*` and `crimsonctl display`
+diagnostics. Your `~/.config` files are not modified.
+
+* **Chunky look back, keep the fixes:** set `lyrics_style = "retro"` under `[ui]` in
+  `~/.config/crimson-desktop/config.toml`, then `crimsonctl restart`.
+* **Exact previous renderer:** in the project folder run
+  `git checkout 26843cf -- dashboard/qml/Crimson/PixelText.qml dashboard/qml/Crimson/LyricsPanel.qml dashboard/qml/Crimson/Theme.qml dashboard/qml/Crimson/HostBindings.qml`
+  then `crimsonctl restart`. To undo that, run `git checkout HEAD -- dashboard/qml/Crimson` and
+  restart again.
+
 ## Spotify (Spicetify) integration
 
 Separate backups live in `backups/spicetify/`; restore them with `crimsonctl spotify restore`.

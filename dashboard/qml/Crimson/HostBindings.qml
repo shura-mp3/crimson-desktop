@@ -13,6 +13,6 @@ QtObject {
         Binding { target: Theme; property: "borderAnim"; value: !!perf.border_anim },
         Binding { target: Theme; property: "visibleUi"; value: ui.visible !== false },
         Binding { target: Theme; property: "playing"; value: !!(backend && backend.player.playing) },
-        Binding { target: Theme; property: "pixelate"; value: !ui.ui_cfg || ui.ui_cfg.pixelate_lyrics !== false }
+        Binding { target: Theme; property: "lyricStyle"; value: (ui.ui_cfg && ui.ui_cfg.lyrics_style === "retro") ? "retro" : "crisp" }
     ]
 }

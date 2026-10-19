@@ -1,8 +1,16 @@
 import QtQuick
 import QtQuick.Effects
 
-// Big chunky pixel typography: a pixel font rendered into a low-resolution layer and scaled up
-// with nearest-neighbour filtering (the look of the reference's lyric words), plus soft glow.
+// Big pixel-style typography (lyrics, clock, status titles).
+//
+// style "crisp" (default): the pixel font (Jersey 10) is drawn as real vector glyphs at the
+//   screen's physical resolution — sharp at any KDE scale factor (100/125/150/200 %) and while
+//   animating, because nothing is rasterised and scaled afterwards. CurveRendering (Qt ≥ 6.7)
+//   keeps the square pixel corners exact at huge sizes; older Qt uses distance-field text.
+//   Readability comes from a hard 1-step drop shadow, not blur.
+// style "retro": the old chunky look — the text is drawn into a low-resolution texture and
+//   enlarged with nearest-neighbour. Each block is a whole number of device pixels and glyph
+//   antialiasing is off, so blocks stay hard and even at any scale factor (see 'holder').
 Item {
     id: root
     property alias text: label.text
@@ -13,56 +21,99 @@ Item {
     property alias wrapMode: label.wrapMode
     property alias fontSizeMode: label.fontSizeMode
     property alias maximumLineCount: label.maximumLineCount
+    property alias minimumPixelSize: label.minimumPixelSize
     property alias elide: label.elide
     property alias textFormat: label.textFormat
     property alias lineHeight: label.lineHeight
     property alias contentWidth: label.contentWidth
     property alias contentHeight: label.contentHeight
-    property real pixelSize: 3          // size of one "pixel" block, in logical px
-    property bool pixelate: Theme.pixelate
+    property real pixelSize: 3          // retro mode: size of one block, in logical px
+    property string style: Theme.lyricStyle
+    readonly property bool retro: style === "retro"
     property bool glow: Theme.glow
     property color glowColor: Theme.rose
+    property bool shadow: true
+    property color shadowColor: Theme.bg
+    // padding so wide glyphs / the shadow never touch the item edge (no clipped first/last letter)
+    property real sidePadding: Theme.px(10)
 
     implicitWidth: label.implicitWidth
     implicitHeight: label.implicitHeight
 
-    // glow: a blurred, crimson-tinted copy underneath the crisp pixel text
+    // physical pixels per logical pixel on the screen this item is shown on
+    readonly property real dpr: Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1
+    // retro: whole device pixels per block (≥ 2)
+    readonly property int blockDevice: Math.max(2, Math.round(pixelSize * dpr))
+
+    // ---- faint glow (optional, balanced/high profiles): soft colour BEHIND crisp text ----
     MultiEffect {
-        visible: root.glow && Theme.visibleUi
-        source: holder
-        anchors.fill: holder
-        // the source is a layer texture: auto-padding would stretch it, so glow stays inside the item
-        autoPaddingEnabled: false
+        visible: root.glow && Theme.visibleUi && !root.retro && label.text !== ""
+        source: label
+        x: label.x; y: label.y; width: label.width; height: label.height
+        autoPaddingEnabled: true
         blurEnabled: true
-        blur: 1.0
-        blurMax: 40
+        blur: 0.6
+        blurMax: 24
         colorization: 1.0
         colorizationColor: root.glowColor
-        blurMultiplier: 0.6
-        brightness: 0.05
-        opacity: 0.8
+        opacity: 0.32
     }
 
+    // ---- hard drop shadow: one crisp offset copy, improves contrast over any wallpaper ----
+    Text {
+        id: shadowCopy
+        visible: root.shadow && !root.retro && label.text !== ""
+        x: label.x + Math.max(1, Math.round(label.font.pixelSize * 0.035 * root.dpr)) / root.dpr
+        y: label.y + Math.max(1, Math.round(label.font.pixelSize * 0.045 * root.dpr)) / root.dpr
+        width: label.width; height: label.height
+        text: label.textFormat === Text.StyledText ? label.text.replace(/<font color='[^']*'>/g, "<font>") : label.text
+        textFormat: label.textFormat
+        font: label.font
+        color: root.shadowColor
+        opacity: 0.85
+        horizontalAlignment: label.horizontalAlignment
+        verticalAlignment: label.verticalAlignment
+        wrapMode: label.wrapMode
+        fontSizeMode: label.fontSizeMode
+        maximumLineCount: label.maximumLineCount
+        minimumPixelSize: label.minimumPixelSize
+        lineHeight: label.lineHeight
+        elide: label.elide
+        renderType: label.renderType
+    }
+
+    // retro: 'holder' is a 1/B-size layer (B = block size in device pixels) holding the text scaled
+    // down by B, then enlarged B× without smoothing. Its texture size is left to Qt (item size ×
+    // device-pixel ratio), so it is correct at every KDE scale factor — setting layer.textureSize by
+    // hand is what clipped the old version at 150 % and made it vanish at 200 %.
+    // crisp: holder and inner are plain 1:1 containers (no layer, no scaling).
     Item {
         id: holder
-        anchors.fill: parent
-        layer.enabled: root.pixelate && root.width > 0 && root.height > 0
+        readonly property real b: root.retro ? root.blockDevice : 1
+        width: root.width / b; height: root.height / b
+        transformOrigin: Item.TopLeft
+        scale: b
+        layer.enabled: root.retro && root.width > 0 && root.height > 0
         layer.smooth: false
         layer.mipmap: false
-        layer.textureSize: Qt.size(Math.max(1, Math.round(root.width / root.pixelSize)),
-                                   Math.max(1, Math.round(root.height / root.pixelSize)))
-        Text {
-            id: label
-            anchors.fill: parent
-            // keep glyphs off the layer edge so the glow blur doesn't smear edge pixels
-            anchors.leftMargin: root.pixelSize * 8; anchors.rightMargin: root.pixelSize * 8
-            font.family: Theme.pixelFont
-            color: Theme.pale
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            minimumPixelSize: 8
-            renderType: Text.QtRendering
+        Item {
+            id: inner
+            width: root.width; height: root.height
+            transformOrigin: Item.TopLeft
+            scale: 1 / holder.b
+            Text {
+                id: label
+                anchors.fill: parent
+                anchors.leftMargin: root.sidePadding; anchors.rightMargin: root.sidePadding
+                font.family: Theme.pixelFont
+                color: Theme.pale
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                minimumPixelSize: 8
+                antialiasing: !root.retro
+                // Text.CurveRendering is undefined on Qt < 6.7 → falls back to distance-field text
+                renderType: Text.CurveRendering !== undefined && !root.retro ? Text.CurveRendering : Text.QtRendering
+            }
         }
     }
-
 }

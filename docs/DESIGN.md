@@ -29,6 +29,26 @@ Changes from the reference, for readability and daily use:
 * Glow, grain and scanlines are subtle and turn off in the low profile.
 * Every value shown is real: system stats, spectrum, track data.
 
+### Big lyric typography (`PixelText.qml`)
+
+The lyric, clock and status words use **Jersey 10**, which already has a pixel look. It's drawn as
+vector glyphs at the monitor's *physical* resolution, using Qt's curve text renderer on Qt 6.7+ and
+distance-field text on older versions. So it stays sharp at 100/125/150/200 % scaling and while it
+animates. Contrast comes from a hard one-step drop shadow plus a faint glow behind the text (the glow
+is off in the low profile).
+
+Earlier versions drew the text into a texture at 1/2.5 of the size and enlarged it with
+nearest-neighbour, with a 40 px blur glow underneath. That gave uneven, fuzzy-edged blocks and a halo
+at every scale. The chunky look is still available as `lyrics_style = "retro"` in `[ui]`: each block
+is a whole number of device pixels and glyph antialiasing is off, so the blocks stay hard.
+
+![before (left) / after (right) at 100, 125, 150 and 200 % scaling](screenshots/lyrics-before-after.png)
+![zoomed to device pixels](screenshots/lyrics-before-after-zoom.png)
+
+Layout: the active line is up to 150 px (scaled to the screen) and fits itself to the tile. Long lines
+wrap onto up to three lines and never shrink below 36 px. The previous and next lines sit a fixed
+distance from the actual glyphs, not from the text box, so short lines don't leave big gaps.
+
 ## 2. Desktop environment decision: stay on KDE Plasma (no Hyprland)
 
 The reference was made on a tiling compositor (Hyprland-style). I evaluated adding one as a second

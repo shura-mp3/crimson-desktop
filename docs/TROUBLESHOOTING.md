@@ -43,6 +43,17 @@ Settings → Keyboard → Shortcuts → "Crimson…" for conflicts.
 (`gamemoderun %command%` in Steam), the dashboard already drops to low automatically. Set
 `gamemode_action = "hide"` to hide it completely during games.
 
+**Lyrics look blurry or soft.** Since the lyric-rendering update, the big lyrics are drawn sharp at
+your monitor's real resolution. If they still look soft:
+* run `git pull` then `crimsonctl restart` (the dashboard only reloads its QML on restart);
+* run `crimsonctl display`: it lists every monitor's resolution and scale as KDE sees them, and what
+  the dashboard renders at (logical size × scale = physical pixels). The physical size should equal
+  the right monitor's native mode;
+* check `[ui] lyrics_style` in `~/.config/crimson-desktop/config.toml`: `"crisp"` is the default,
+  `"retro"` is the deliberately chunky look. An old `pixelate_lyrics` line there is ignored now;
+* measure the dashboard's cost on your GPU: `bin/crimson-dashboard --demo --stats 10` (opens a
+  temporary preview window and prints fps and CPU time).
+
 **Fonts look generic.** The dashboard loads its bundled fonts directly. For other apps, `install.sh`
 copies them to `~/.local/share/fonts/crimson-desktop`. Run `fc-cache -f` if needed.
 
