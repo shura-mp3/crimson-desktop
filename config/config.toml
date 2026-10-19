@@ -61,6 +61,8 @@ allowed_origins = ["https://xpui.app.spotify.com"]
 #   "retro" = extra-chunky nearest-neighbour pixel blocks (the original look, now DPI-correct)
 # (pixelate_lyrics from older versions is still accepted but no longer changes anything.)
 lyrics_style = "crisp"
+# Neon glow behind the big lyrics/clock: 0 = off ... 1 = strong. The low performance profile turns it off.
+lyrics_glow = 0.8
 clock_24h = true
 # Shown in the system panel prompt; empty = your login name.
 username = ""

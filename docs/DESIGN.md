@@ -34,8 +34,10 @@ Changes from the reference, for readability and daily use:
 The lyric, clock and status words use **Jersey 10**, which already has a pixel look. It's drawn as
 vector glyphs at the monitor's *physical* resolution, using Qt's curve text renderer on Qt 6.7+ and
 distance-field text on older versions. So it stays sharp at 100/125/150/200 % scaling and while it
-animates. Contrast comes from a hard one-step drop shadow plus a faint glow behind the text (the glow
-is off in the low profile).
+animates. The neon glow is two blurred, crimson-tinted copies (a wide halo and a tight rim) drawn
+*behind* the crisp glyphs, so it never softens the letters. Its strength is `[ui] lyrics_glow`
+(0 = off … 1 = strong, default 0.8) and it's off in the low profile. A hard drop shadow takes over
+when the glow is weak or off.
 
 Earlier versions drew the text into a texture at 1/2.5 of the size and enlarged it with
 nearest-neighbour, with a 40 px blur glow underneath. That gave uneven, fuzzy-edged blocks and a halo

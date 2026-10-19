@@ -51,6 +51,8 @@ your monitor's real resolution. If they still look soft:
   the right monitor's native mode;
 * check `[ui] lyrics_style` in `~/.config/crimson-desktop/config.toml`: `"crisp"` is the default,
   `"retro"` is the deliberately chunky look. An old `pixelate_lyrics` line there is ignored now;
+* want more or less neon? set `lyrics_glow` under `[ui]` (0 = off … 1 = strong, default 0.8),
+  then `crimsonctl restart`;
 * measure the dashboard's cost on your GPU: `bin/crimson-dashboard --demo --stats 10` (opens a
   temporary preview window and prints fps and CPU time).
 

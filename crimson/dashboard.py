@@ -238,7 +238,7 @@ def make_backend_classes():
 """
 
         def __init__(self, start_ms: int = 5900, art: str = "", lyrics_status: str = "synced", display: str = "auto",
-                     style: str = "crisp", perf_level: str = "balanced", playing: bool = True):
+                     style: str = "crisp", perf_level: str = "balanced", playing: bool = True, glow: float = 0.8):
             super().__init__()
             from . import lrc
             self.t0 = time.time() * 1000 - start_ms
@@ -249,7 +249,7 @@ def make_backend_classes():
             perf = config.PERFORMANCE[perf_level]
             self._ui = {"visible": True, "perf": perf, "effective_performance": perf_level, "audio_available": True,
                         "audio_source": "system", "display_mode": display, "demo": True,
-                        "ui_cfg": dict(config.DEFAULTS["ui"], lyrics_style=style)}
+                        "ui_cfg": dict(config.DEFAULTS["ui"], lyrics_style=style, lyrics_glow=glow)}
             self._player = {"available": True, "player": "spotify", "status": "Playing" if playing else "Paused", "playing": playing,
                             "track": {"id": "demo", "title": "Everything You Are", "artist": "Crimson Test",
                                       "album": "Signal Lost", "length_ms": 30000, "art_url": ""},
@@ -305,6 +305,7 @@ def main() -> None:
     ap.add_argument("--demo-style", default="crisp", choices=["crisp", "retro"], help="demo lyric typography")
     ap.add_argument("--demo-perf", default="balanced", choices=["low", "balanced", "high"], help="demo performance profile")
     ap.add_argument("--demo-paused", action="store_true", help="demo with playback paused")
+    ap.add_argument("--demo-glow", type=float, default=0.8, help="demo lyric glow strength 0..1")
     ap.add_argument("--size", help="window size WxH (testing)")
     ap.add_argument("--screenshot", help="render, save PNG to this path and exit")
     ap.add_argument("--screenshot-delay", type=int, default=2500)
@@ -353,7 +354,7 @@ def main() -> None:
 
     _, SocketBackend, DemoBackend = make_backend_classes()
     backend = (DemoBackend(args.demo_pos, args.demo_art, args.demo_state, args.demo_display, args.demo_style,
-                           args.demo_perf, not args.demo_paused) if args.demo else SocketBackend())
+                           args.demo_perf, not args.demo_paused, args.demo_glow) if args.demo else SocketBackend())
 
     screen = pick_screen(app, args.monitor or cfg["dashboard"].get("monitor", "auto"))
     engine = QQmlApplicationEngine()

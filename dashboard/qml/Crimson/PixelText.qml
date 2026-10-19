@@ -7,7 +7,7 @@ import QtQuick.Effects
 //   screen's physical resolution — sharp at any KDE scale factor (100/125/150/200 %) and while
 //   animating, because nothing is rasterised and scaled afterwards. CurveRendering (Qt ≥ 6.7)
 //   keeps the square pixel corners exact at huge sizes; older Qt uses distance-field text.
-//   Readability comes from a hard 1-step drop shadow, not blur.
+//   A neon glow (strength: [ui] lyrics_glow) is drawn BEHIND the glyphs, so it never softens them.
 // style "retro": the old chunky look — the text is drawn into a low-resolution texture and
 //   enlarged with nearest-neighbour. Each block is a whole number of device pixels and glyph
 //   antialiasing is off, so blocks stay hard and even at any scale factor (see 'holder').
@@ -45,18 +45,38 @@ Item {
     // retro: whole device pixels per block (≥ 2)
     readonly property int blockDevice: Math.max(2, Math.round(pixelSize * dpr))
 
-    // ---- faint glow (optional, balanced/high profiles): soft colour BEHIND crisp text ----
+    // ---- neon glow BEHIND the text (the text itself stays crisp on top) ----
+    // Two layers: a wide soft halo and a tight bright rim. Strength comes from [ui] lyrics_glow
+    // (0 = off … 1 = strong); the low performance profile turns it off.
+    property real glowStrength: Theme.lyricGlow
+    readonly property bool glowOn: root.glow && root.glowStrength > 0 && Theme.visibleUi && label.text !== ""
     MultiEffect {
-        visible: root.glow && Theme.visibleUi && !root.retro && label.text !== ""
-        source: label
-        x: label.x; y: label.y; width: label.width; height: label.height
+        visible: root.glowOn
+        source: root.retro ? holder : label
+        x: root.retro ? 0 : label.x; y: root.retro ? 0 : label.y
+        width: root.retro ? root.width : label.width; height: root.retro ? root.height : label.height
         autoPaddingEnabled: true
         blurEnabled: true
-        blur: 0.6
-        blurMax: 24
+        blur: 1.0
+        blurMax: 48
+        blurMultiplier: 0.7
         colorization: 1.0
         colorizationColor: root.glowColor
-        opacity: 0.32
+        brightness: 0.12
+        opacity: Math.min(1, 1.15 * root.glowStrength)
+    }
+    MultiEffect {
+        visible: root.glowOn
+        source: root.retro ? holder : label
+        x: root.retro ? 0 : label.x; y: root.retro ? 0 : label.y
+        width: root.retro ? root.width : label.width; height: root.retro ? root.height : label.height
+        autoPaddingEnabled: true
+        blurEnabled: true
+        blur: 0.8
+        blurMax: 16
+        colorization: 1.0
+        colorizationColor: Qt.lighter(root.glowColor, 1.3)
+        opacity: Math.min(1, 1.0 * root.glowStrength)
     }
 
     // ---- hard drop shadow: one crisp offset copy, improves contrast over any wallpaper ----
@@ -70,7 +90,8 @@ Item {
         textFormat: label.textFormat
         font: label.font
         color: root.shadowColor
-        opacity: 0.85
+        // the glow does the separating; the dark shadow fades out as the glow gets stronger
+        opacity: root.glowOn ? Math.max(0, 0.85 - 1.1 * root.glowStrength) : 0.85
         horizontalAlignment: label.horizontalAlignment
         verticalAlignment: label.verticalAlignment
         wrapMode: label.wrapMode

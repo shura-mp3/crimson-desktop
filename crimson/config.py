@@ -67,6 +67,8 @@ DEFAULTS: dict[str, Any] = {
         # "retro": extra chunky nearest-neighbour blocks. (Replaces the old pixelate_lyrics key,
         # which is still accepted in config files but no longer changes the renderer.)
         "lyrics_style": "crisp",
+        # neon glow behind the big lyric/clock text: 0 = off ... 1 = strong (off in the low profile)
+        "lyrics_glow": 0.8,
         "pixelate_lyrics": False,
         "clock_24h": True,
         "username": "",

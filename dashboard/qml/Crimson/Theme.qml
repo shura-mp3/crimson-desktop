@@ -36,6 +36,7 @@ QtObject {
     property bool visibleUi: true
     property bool playing: false
     property string lyricStyle: "crisp"  // crisp | retro (see PixelText.qml)
+    property real lyricGlow: 0.8         // 0 = off … 1 = strong neon glow behind big text
 
     // decorative animations only run while visible + music playing
     readonly property bool animateDecor: visibleUi && decor && playing
